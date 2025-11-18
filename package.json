@@ -1,0 +1,22 @@
+{
+  "name": "game-rapier",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.2.2"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d": "^0.19.3",
+    "@dimforge/rapier3d-compat": "^0.19.3",
+    "gsap": "^3.13.0",
+    "lil-gui": "^0.21.0",
+    "stats.js": "^0.17.0",
+    "three": "^0.181.1"
+  }
+}
