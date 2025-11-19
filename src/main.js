@@ -62,26 +62,35 @@ async function init(){
 
 
   // postprocessing ++++++++++++++++++++
-  // const postprocessingFoder = gui.addFolder('postprocessing')
-  // const effectComposser = new EffectComposer(renderer);
+
+  const postprocessingFoder = gui.addFolder('postprocessing');
+
+  const rendererTarget = new THREE.WebGLRenderTarget(800,600,
+    {
+      samples:15
+    }
+  )
+
+  postprocessingFoder.add(rendererTarget,'samples',0,50,1).name('samples')
+  const effectComposser = new EffectComposer(renderer,rendererTarget);
 
 
-  // const renderPass= new RenderPass(scene,camera);
-  // effectComposser.addPass(renderPass)
+  const renderPass= new RenderPass(scene,camera);
+  effectComposser.addPass(renderPass)
 
   // // const ray = new GodRay
 
-  // const glitchPass = new GlitchPass()
-  // effectComposser.addPass(glitchPass);
+  const glitchPass = new GlitchPass()
+  effectComposser.addPass(glitchPass);
 
-  // postprocessingFoder.add(glitchPass,'enabled').name('glitch enable');
+  postprocessingFoder.add(glitchPass,'enabled').name('glitch enable');
 
   // const smaaPass = new SMAAPass();
-  // smaaPass.setSize(canvasSize.width(),canvasSize.height())
+  // // smaaPass.setSize(canvasSize.width(),canvasSize.height())
   // effectComposser.addPass(smaaPass);
   // console.log(smaaPass)
   // postprocessingFoder.add(smaaPass,'enabled').name('enable smaa')
-  // postprocessingFoder.add(smaaPass.,'samples').name('enable smaa')
+ 
 
   // const taaPass = new TAARenderPass(scene,camera);
   // effectComposser.addPass(taaPass)
@@ -197,8 +206,8 @@ window.addEventListener('click',ev=>{
 
 
 
-    renderer.render(scene,camera);
-    // effectComposser.render(clock.getDelta())
+    // renderer.render(scene,camera);
+    effectComposser.render(clock.getDelta())
     world.step()
     // console.log(boxBody.translation())
     mover.position.copy(moverBody.translation());
@@ -269,12 +278,15 @@ function reCreateCubes(count){
 function createBoxes(count = 5){
 
   const boxMat = new THREE.MeshPhongMaterial({color:0xff00ff});
-  const wireMat =  new THREE.MeshStandardMaterial({color:0x22eeff,wireframe:true,roughness:0.2,metalness:0.1,emissive:0xff00ff,emissiveIntensity:3});
+  
   
   const boxGeo =  new THREE.BoxGeometry(1,1,1);
   const Cubes = []
 
   for(let i = 0 ; i< count ; i++){
+
+    const wireMat =  new THREE.MeshStandardMaterial({color:0x22eeff,wireframe:true,roughness:0.2,metalness:0.1,emissive:0xff00ff,emissiveIntensity:3});
+    wireMat.emissive = new THREE.Color(Math.random()*4, Math.random()*0.5,Math.random()*0.7)
  
    const box = new THREE.Mesh(boxGeo,boxMat);
   box.castShadow  =true
