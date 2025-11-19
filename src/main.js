@@ -130,7 +130,7 @@ async function init(){
 
 
    const cubesControls = gui.addFolder('cubes Properties');
-   cubesControls.add(cubesProperties,'count',1,1000,5).name('number of cubes').onChange( value=>reCreateCubes(value))
+   cubesControls.add(cubesProperties,'count',1,2000,5).name('number of cubes').onChange( value=>reCreateCubes(value))
    cubesControls.add({restart:false},'restart').onChange(()=>reCreateCubes(cubesProperties.count));
 
 
@@ -150,9 +150,12 @@ async function init(){
   scene.add(mover);
 
   const moverBody = world.createRigidBody( RAPIER.RigidBodyDesc.dynamic().setTranslation(1.5,1.55,1.5));
-  world.createCollider(RAPIER.ColliderDesc.cuboid(1.5,1.5,1.5).setFriction(0.5).setMass(40),moverBody)
+  world.createCollider(RAPIER.ColliderDesc.cuboid(1.5,1.5,1.5).setFriction(0.5).setMass(40),moverBody);
 
+window.addEventListener('click',ev=>{
+  moverBody.setAngvel({x:0,y:10+moverBody.angvel().y,z:0})
 
+})
 
 
   // ground ++++++++++
