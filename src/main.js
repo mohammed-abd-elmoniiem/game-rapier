@@ -30,16 +30,10 @@ document.body.appendChild(stats.dom)
 
 async function init(){
 
-
-
-
   // physics 
   await RAPIER.init();
   const gravity = new RAPIER.Vector3(0,-9.82,0);
   const world = new RAPIER.World(gravity);
-
-
-
 
   // scene , camera and renderer  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -56,6 +50,7 @@ async function init(){
   const renderer = new THREE.WebGLRenderer({canvas:canvasElement , antialias:true});
   renderer.render(scene , camera);
   renderer.setSize(canvasSize.width(), canvasSize.height());
+
   // renderer.shadowMap.enabled = true;
   // renderer.shadowMap.type = THREE.VSMShadowMap;
 
@@ -63,27 +58,27 @@ async function init(){
 
   // postprocessing ++++++++++++++++++++
 
-  const postprocessingFoder = gui.addFolder('postprocessing');
+  // const postprocessingFoder = gui.addFolder('postprocessing');
 
-  const rendererTarget = new THREE.WebGLRenderTarget(800,600,
-    {
-      samples:15
-    }
-  )
+  // const rendererTarget = new THREE.WebGLRenderTarget(800,600,
+  //   {
+  //     samples:15
+  //   }
+  // )
 
-  postprocessingFoder.add(rendererTarget,'samples',0,50,1).name('samples')
-  const effectComposser = new EffectComposer(renderer,rendererTarget);
+  // postprocessingFoder.add(rendererTarget,'samples',0,50,1).name('samples')
+  // const effectComposser = new EffectComposer(renderer,rendererTarget);
 
 
-  const renderPass= new RenderPass(scene,camera);
-  effectComposser.addPass(renderPass)
+  // const renderPass= new RenderPass(scene,camera);
+  // effectComposser.addPass(renderPass)
 
-  // // const ray = new GodRay
+  // // // const ray = new GodRay
 
-  const glitchPass = new GlitchPass()
-  effectComposser.addPass(glitchPass);
+  // const glitchPass = new GlitchPass()
+  // effectComposser.addPass(glitchPass);
 
-  postprocessingFoder.add(glitchPass,'enabled').name('glitch enable');
+  // postprocessingFoder.add(glitchPass,'enabled').name('glitch enable');
 
   // const smaaPass = new SMAAPass();
   // // smaaPass.setSize(canvasSize.width(),canvasSize.height())
@@ -167,14 +162,14 @@ window.addEventListener('click',ev=>{
 })
 
 
-  // ground ++++++++++
+  // ground ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const length = 200;
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(length,length),
     new THREE.MeshPhongMaterial({color:0xffffff ,side:THREE.DoubleSide})
-  )
+  );
   ground.receiveShadow =true;
-  ground.rotation.x = Math.PI * 0.5
+  ground.rotation.x = Math.PI * 0.5;
 
   scene.add(ground);
 
@@ -206,8 +201,8 @@ window.addEventListener('click',ev=>{
 
 
 
-    // renderer.render(scene,camera);
-    effectComposser.render(clock.getDelta())
+    renderer.render(scene,camera);
+    // effectComposser.render();
     world.step()
     // console.log(boxBody.translation())
     mover.position.copy(moverBody.translation());
@@ -217,10 +212,7 @@ window.addEventListener('click',ev=>{
     randomCubes.forEach(ele=>ele.update())
 
 
-    // move the camera on a circle path manually
-    // camera.position.x = 15 * Math.cos(time * 0.4);
-    // camera.position.z = 15 * Math.sin(time * 0.4);
-    // camera.lookAt(mover.position)
+  
 
    
 
@@ -237,7 +229,7 @@ window.addEventListener('click',ev=>{
 
 // lights+++++++++++++++++++++++++++++++++++++++++++
 
-const pointLight = new THREE.PointLight(0xffeaa3 , 4,30,0.1);
+const pointLight = new THREE.PointLight(0xffffff , 4,30,0.1);
 pointLight.position.set(5,15,0);
 pointLight.castShadow = true;
 // pointLight.shadow.mapSize.set(512,512);
@@ -245,11 +237,14 @@ pointLight.castShadow = true;
 // pointLight.shadow.normalBias = 0.05;
 // pointLight.shadow.radius = 100
 
-const amLight = new THREE.AmbientLight(0x555555,0.2)
+const amLight = new THREE.AmbientLight(0x555555,0.001)
 
 
 
-// scene.add(pointLight,amLight);
+scene.add(pointLight,amLight);
+
+const lightGui =  gui.addFolder('lighting');
+lightGui.add(pointLight,'intensity',0,10,0.1).name('point light intensity')
 //  --------------------------------------------------------------lights
 
 
@@ -286,18 +281,20 @@ function createBoxes(count = 5){
   for(let i = 0 ; i< count ; i++){
 
     const wireMat =  new THREE.MeshStandardMaterial({color:0x22eeff,wireframe:true,roughness:0.2,metalness:0.1,emissive:0xff00ff,emissiveIntensity:3});
-    wireMat.emissive = new THREE.Color(Math.random()*4, Math.random()*0.5,Math.random()*0.7)
+   
  
    const box = new THREE.Mesh(boxGeo,boxMat);
-  box.castShadow  =true
+
   const boxWire =new THREE.Mesh(boxGeo,wireMat);
-  boxWire.material.wireframe =true
+ 
    box.add(boxWire)
   
 
   const boxBody = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(10*(Math.random()-0.5),15+50*Math.random() + 5,10*(Math.random()-0.5)));
   const boxCollider = RAPIER.ColliderDesc.cuboid(0.5,0.5,0.5);
-  boxCollider.restitution = 0.4
+  boxCollider.restitution = 0.8
+  boxCollider.mass= Math.random()
+
 
   world.createCollider(boxCollider,boxBody);
   
@@ -318,27 +315,27 @@ function connectMeshToRigid(){
 
 
 // control the mover
-window.addEventListener('keydown',eve=>{
-  console.log(eve.key)
-  if(eve.key =='ArrowUp'){
+// window.addEventListener('keydown',eve=>{
+//   console.log(eve.key)
+//   if(eve.key =='ArrowUp'){
   
-    moverBody.applyImpulse({x:0,y:0,z:20})
-  }
-  if(eve.key =='ArrowDown'){
+//     moverBody.applyImpulse({x:0,y:0,z:20})
+//   }
+//   if(eve.key =='ArrowDown'){
     
-    moverBody.applyImpulse({x:0,y:0,z:-20})
-  }
-   if(eve.key =='ArrowRight'){
-     moverBody.applyImpulse({x:20,y:0,z:0})
+//     moverBody.applyImpulse({x:0,y:0,z:-20})
+//   }
+//    if(eve.key =='ArrowRight'){
+//      moverBody.applyImpulse({x:20,y:0,z:0})
 
-  }
-   if(eve.key =='ArrowLeft'){
+//   }
+//    if(eve.key =='ArrowLeft'){
    
-    moverBody.applyImpulse({x:-20,y:0,z:0})
-  }
+//     moverBody.applyImpulse({x:-20,y:0,z:0})
+//   }
 
   
-})
+// })
 
 }
 
